@@ -10,4 +10,4 @@ Rain-check requires a [Pushover](https://pushover.net/) account with an app key 
 To build:
 `go install`
 
-Rain check runs and a command-line utility.  Type `rain-check help` for option information.
+Rain check runs as a command-line utility.  Type `rain-check help` for option information.
