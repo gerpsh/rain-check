@@ -67,16 +67,22 @@ func main() {
 		weatherToken := c.String("wt")
 		pushAppToken := c.String("pt")
 		pushUserToken := c.String("pu")
+		if weatherToken == "" || pushAppToken == "" || pushUserToken == "" {
+			log.Fatal("Error: Rain-check requires Pushover API tokens and an OpenWeatherAPI token.  Please provide these using the appropriate cli flags.")
+		}
 		var lat string
 		var long string
 		var city string
 		var url string
 		if (c.String("lat") != "") || (c.String("long") != "") {
 			if c.String("city") != "" {
-				log.Fatal("Cannot provide latitude/longitude values with city value")
+				log.Fatal("Error: Cannot provide latitude/longitude values with city value")
 			}
 			lat = c.String("lat")
 			long = c.String("long")
+			if lat == "" || long == "" {
+				log.Fatal("Error: Latitude and longitude must both be provided when using geographic coordinates!")
+			}
 			url = fmt.Sprintf("http://api.openweathermap.org/data/2.5/weather?lat=%s&lon=%s&appid=%s", lat, long, weatherToken)
 		} else {
 			city = c.String("city")
@@ -85,9 +91,10 @@ func main() {
 		currentWeather := 700
 		for {
 			resp, err := http.Get(url)
-			handleErr(err, "Error fetching weather data.  Be sure you have an internet connect and you provided the correct flags")
+			handleErr(err, "Error fetching weather data.  Be sure you have an internet connection and you provided the correct flags")
 			body, _ := ioutil.ReadAll(resp.Body)
-			parsed, _ := gabs.ParseJSON(body)
+			parsed, err := gabs.ParseJSON(body)
+			handleErr(err, "Error processing OpenWeatherMap API request.  Please be sure your API token is valid")
 			weatherCode, _ := parsed.Path("weather").Index(0).Path("id").Data().(int)
 			if weatherCode < 700 {
 				if currentWeather >= 700 {
